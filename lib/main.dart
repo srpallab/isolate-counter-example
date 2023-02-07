@@ -36,7 +36,7 @@ Stream<int> autoCounter() {
 }
 
 void _autoCounter(SendPort sp) async {
-  int counter = 0;
+  int counter = 1;
   await for (final count in Stream<int>.periodic(
     const Duration(seconds: 1),
     (_) => counter++,
@@ -47,8 +47,18 @@ void _autoCounter(SendPort sp) async {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  int _counter2 = 0;
 
-  void _incrementCounter() async {
+  void _incrementCounterNormal() async {
+    for (int i = 1; i <= 100; i++) {
+      await Future.delayed(const Duration(seconds: 1));
+      setState(() {
+        _counter2 = i;
+      });
+    }
+  }
+
+  void _incrementCounterIsolate() async {
     await for (final count in autoCounter()) {
       setState(() {
         _counter = count;
@@ -68,14 +78,22 @@ class _MyHomePageState extends State<MyHomePage> {
               'You have pushed the button this many times:',
             ),
             Text(
-              '$_counter',
+              'Isolate $_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(width: 2),
+            Text(
+              'Normal : $_counter2',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {
+          _incrementCounterNormal();
+          _incrementCounterIsolate();
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
